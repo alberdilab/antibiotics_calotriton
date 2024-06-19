@@ -1,0 +1,167 @@
+# Alpha diversity
+
+```{r load_data_alpha}
+load("data/data.Rdata")
+```
+
+```{r alpha_div, comment="", message=FALSE, warning=FALSE}
+# Calculate Hill numbers
+richness <- genome_counts_filt %>%
+  column_to_rownames(var = "genome") %>%
+  dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 0) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(richness = 1) %>%
+  rownames_to_column(var = "sample")
+
+neutral <- genome_counts_filt %>%
+  column_to_rownames(var = "genome") %>%
+  dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 1) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(neutral = 1) %>%
+  rownames_to_column(var = "sample")
+
+phylogenetic <- genome_counts_filt %>%
+  column_to_rownames(var = "genome") %>%
+  dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 1, tree = genome_tree) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(phylogenetic = 1) %>%
+  rownames_to_column(var = "sample")
+
+# Aggregate basal GIFT into elements
+dist <- genome_gifts %>%
+  to.elements(., GIFT_db) %>%
+  traits2dist(., method = "gower")
+
+functional <- genome_counts_filt %>%
+  filter(genome %in% rownames(dist)) %>% 
+  column_to_rownames(var = "genome") %>%
+  dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 1, dist = dist) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(functional = 1) %>%
+  rownames_to_column(var = "sample") %>%
+  mutate(functional = if_else(is.nan(functional), 1, functional))
+
+# Merge all metrics
+alpha_div <- richness %>%
+  full_join(neutral, by = join_by(sample == sample)) %>%
+  full_join(phylogenetic, by = join_by(sample == sample)) %>%
+  full_join(functional, by = join_by(sample == sample))
+```
+
+```{r alpha_div_boxplot, comment="", message=FALSE, warning=FALSE, fig.height=3, fig.width=10, fig.fullwidth=TRUE}
+#Richness
+alpha_div %>%
+  pivot_longer(-sample, names_to = "metric", values_to = "value") %>%
+  left_join(., sample_metadata, by = join_by(sample == sample)) %>%
+  filter(metric=="richness") %>%
+      ggplot(aes(y = value, x = time_point, group=time_point, color=time_point, fill=time_point)) +
+      geom_boxplot(outlier.shape = NA) +
+      geom_jitter(alpha=0.5) +
+      scale_color_manual(name="Time_point",
+          breaks=c("Pre_antibiotics","Post_antibiotics_1", "Post_antibiotics_2"),
+          labels=c("Pre_ant","Post_ant_1", "Post_ant_2"),
+          values=c("#CC9900","#66CC99", "#990066")) +
+      scale_fill_manual(name="Time_point",
+          breaks=c("Pre_antibiotics","Post_antibiotics_1", "Post_antibiotics_2"),
+          labels=c("Pre_ant","Post_ant_1", "Post_ant_2"),
+          values=c("#CC990050","#66CC9950", "#99006650")) +
+      coord_cartesian(xlim = c(1, NA)) +
+      theme_classic() +
+      theme(
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_line(size = .1, color = "grey"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      )
+
+#Neutral
+alpha_div %>%
+  pivot_longer(-sample, names_to = "metric", values_to = "value") %>%
+  left_join(., sample_metadata, by = join_by(sample == sample)) %>%
+  filter(metric=="neutral") %>%
+      ggplot(aes(y = value, x = time_point, group=time_point, color=time_point, fill=time_point)) +
+      geom_boxplot(outlier.shape = NA) +
+      geom_jitter(alpha=0.5) +
+      scale_color_manual(name="Time_point",
+          breaks=c("Pre_antibiotics","Post_antibiotics_1", "Post_antibiotics_2"),
+          labels=c("Pre_ant","Post_ant_1", "Post_ant_2"),
+          values=c("#CC9900","#66CC99", "#990066")) +
+      scale_fill_manual(name="Time_point",
+          breaks=c("Pre_antibiotics","Post_antibiotics_1", "Post_antibiotics_2"),
+          labels=c("Pre_ant","Post_ant_1", "Post_ant_2"),
+          values=c("#CC990050","#66CC9950", "#99006650")) +
+      coord_cartesian(xlim = c(1, NA)) +
+      theme_classic() +
+      theme(
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_line(size = .1, color = "grey"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      )
+
+#Phylogenetic
+alpha_div %>%
+  pivot_longer(-sample, names_to = "metric", values_to = "value") %>%
+  left_join(., sample_metadata, by = join_by(sample == sample)) %>%
+  filter(metric=="phylogenetic") %>%
+      ggplot(aes(y = value, x = time_point, group=time_point, color=time_point, fill=time_point)) +
+      geom_boxplot(outlier.shape = NA) +
+      geom_jitter(alpha=0.5) +
+      scale_color_manual(name="Time_point",
+          breaks=c("Pre_antibiotics","Post_antibiotics_1", "Post_antibiotics_2"),
+          labels=c("Pre_ant","Post_ant_1", "Post_ant_2"),
+          values=c("#CC9900","#66CC99", "#990066")) +
+      scale_fill_manual(name="Time_point",
+          breaks=c("Pre_antibiotics","Post_antibiotics_1", "Post_antibiotics_2"),
+          labels=c("Pre_ant","Post_ant_1", "Post_ant_2"),
+          values=c("#CC990050","#66CC9950", "#99006650")) +
+      coord_cartesian(xlim = c(1, NA)) +
+      theme_classic() +
+      theme(
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_line(size = .1, color = "grey"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      )
+
+#Functional
+alpha_div %>%
+  pivot_longer(-sample, names_to = "metric", values_to = "value") %>%
+  left_join(., sample_metadata, by = join_by(sample == sample)) %>%
+  filter(metric=="functional") %>%
+      ggplot(aes(y = value, x = time_point, group=time_point, color=time_point, fill=time_point)) +
+      geom_boxplot(outlier.shape = NA) +
+      geom_jitter(alpha=0.5) +
+      scale_color_manual(name="Time_point",
+          breaks=c("Pre_antibiotics","Post_antibiotics_1", "Post_antibiotics_2"),
+          labels=c("Pre_ant","Post_ant_1", "Post_ant_2"),
+          values=c("#CC9900","#66CC99", "#990066")) +
+      scale_fill_manual(name="Time_point",
+          breaks=c("Pre_antibiotics","Post_antibiotics_1", "Post_antibiotics_2"),
+          labels=c("Pre_ant","Post_ant_1", "Post_ant_2"),
+          values=c("#CC990050","#66CC9950", "#99006650")) +
+      coord_cartesian(xlim = c(1, NA)) +
+      theme_classic() +
+      theme(
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_line(size = .1, color = "grey"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1) +
+  scale_x_discrete(name ="Time-point", 
+                    limits=c("2","1","0.5"))
+      )
+```
+
+

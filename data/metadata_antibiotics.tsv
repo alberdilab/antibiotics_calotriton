@@ -1,0 +1,12 @@
+sample	individual	time_point	population	region
+AJ63	Erlan_1	Pre_antibiotics	Erlan	Nafarroa
+AJ72	Erlan_3	Pre_antibiotics	Erlan	Nafarroa
+AJ75	Harpea_6	Pre_antibiotics	Harpea	Nafarroa
+AJ78	Erlan_8	Pre_antibiotics	Erlan	Nafarroa
+AJ99	Erlan_1	Post_antibiotics_1	Erlan	Nafarroa
+AK01	Erlan_3	Post_antibiotics_1	Erlan	Nafarroa
+AK03	Erlan_8	Post_antibiotics_1	Erlan	Nafarroa
+AK05	Harpea_6	Post_antibiotics_1	Harpea	Nafarroa
+AK12	Erlan_3	Post_antibiotics_2	Erlan	Nafarroa
+AK13	Erlan_1	Post_antibiotics_2	Erlan	Nafarroa
+AK14	Erlan_8	Post_antibiotics_2	Erlan	Nafarroa
