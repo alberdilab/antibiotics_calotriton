@@ -286,6 +286,10 @@ data_stats <- raw_reads %>%
   left_join(host_mapped) %>%
   left_join(singlem) %>%
   left_join(mag_mapping)
+
+data_stats<- data_stats %>%
+  filter(!str_detect(sample, "newr \\|")) %>%
+  filter(!str_detect(sample, "nonnewr \\|"))
 ```
 
 ## Prepare color scheme

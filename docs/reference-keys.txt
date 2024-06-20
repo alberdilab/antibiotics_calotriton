@@ -8,12 +8,22 @@ sample-metadata
 read-counts
 genome-base-hits
 genome-taxonomy
+genome-quality
 genome-tree
 genome-annotations
 create-working-objects
+merge-genome-taxonomy-and-quality
+calculate-genome-coverage
 filter-reads-by-coverage
 transform-reads-into-genome-counts
 distill-annotations-into-gifts
+load-data-statistics
+raw-reads
+quality-filtered-reads
+host-mapped-reads
+prokaryotic-fraction
+mag-mapped-reads
+wrap-data-statistics
 prepare-color-scheme
 wrap-working-objects
 data-statistics
@@ -22,7 +32,7 @@ dna-fractions
 recovered-microbial-fraction
 mag-catalogue
 genome-phylogeny
-genome-quality
+genome-quality-1
 functional-overview
 functional-ordination
 community-composition
@@ -37,3 +47,5 @@ beta-diversity
 permanova
 richness-diversity-plot
 neutral-diversity-plot
+phylogenetic-diversity-plot
+functional-diversity-plot
