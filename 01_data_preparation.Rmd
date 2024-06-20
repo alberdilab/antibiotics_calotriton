@@ -35,7 +35,7 @@ read_counts <- merge_and_rename(read_counts_raw)
 
 ### Genome base hits
 
-```{r load_genome_hits_1, warning=FALSE, comments="", message=FALSE, eval=FALSE}
+```{r load_genome_hits_1, warning=FALSE, comments="", message=FALSE}
 genome_hits_raw <- read_tsv("data/genome.covered_bases.tsv") %>%
     rename(genome=1)
 
@@ -58,7 +58,7 @@ genome_hits <- merge_and_rename(genome_hits_raw)
 
 ### Genome taxonomy
 
-```{r load_genome_metadata_1, warning=FALSE, comments="", message=FALSE, eval=FALSE}
+```{r load_genome_metadata_1, warning=FALSE, comments="", message=FALSE}
 genome_taxonomy <- read_tsv("data/gtdbtk.summary.tsv") %>%
   select(mag_id = user_genome, classification) %>%
   separate(
@@ -112,10 +112,6 @@ genome_metadata <- genome_taxonomy %>%
 ### Calculate genome coverage
 
 ```{r calculate_genome_coverage, warning=FALSE, comments="", message=FALSE}
-#Filter genome_hits for the MAGs with over 70% completeness and less than 10% contamination
-genome_hits <- genome_hits %>%
-  semi_join(genome_quality, by = "genome")
-
 genome_coverage <- genome_hits %>%
   mutate(across(where(is.numeric), ~ ./genome_metadata$length))
 ```
