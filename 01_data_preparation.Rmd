@@ -81,10 +81,6 @@ genome_quality <- read_tsv("data/quality_report.tsv") %>%
   )
 genome_quality<-genome_quality %>% 
   mutate (genome=str_remove_all(genome,".fa"))
-
-#Filter MAGs with over 70% completeness and less than 10% contamination
-genome_quality <- genome_quality %>%
-  filter(completeness > 70 & contamination < 10)
 ```
 
 ### Genome tree
@@ -92,10 +88,6 @@ genome_quality <- genome_quality %>%
 ```{r load_genome_tree_1, warning=FALSE, comments="", message=FALSE, eval=FALSE}
 genome_tree <- read_tree("data/gtdbtk.backbone.bac120.classify.tree")
 genome_tree$tip.label <- str_replace_all(genome_tree$tip.label,"'", "") #remove single quotes in MAG names
-
-#Filter genome_taxonomy to keep MAGs with over 70% completeness and less than 10% contamination
-genome_taxonomy <- genome_taxonomy %>%
-  semi_join(genome_quality, by = "genome")
 genome_tree <- keep.tip(genome_tree, tip=genome_taxonomy$genome) # keep only MAG tips
 ```
 
@@ -104,10 +96,6 @@ genome_tree <- keep.tip(genome_tree, tip=genome_taxonomy$genome) # keep only MAG
 ```{r load_genome_annotations_1, warning=FALSE, comments="", message=FALSE}
 genome_annotations <- read_tsv("data/annotations.tsv.gz") %>%
     rename(gene=1, genome=2, contig=3)
-
-#Filter only the MAGs with over 70% completeness and less than 10% contamination
-genome_annotations <- genome_annotations %>%
-  semi_join(genome_quality, by = "genome")
 ```
 
 ## Create working objects
@@ -189,17 +177,21 @@ raw_reads <-
 fastp_reads <-
   "data/multiqc_general_stats.txt" %>%
   read_tsv() %>%
+  filter(str_detect(Sample, "fastp")) %>%
   select(
     sample = Sample,
     trimmed_reads = `FastQC_mqc-generalstats-fastqc-total_sequences`
   ) %>%
-   mutate(
+  mutate(
     sample =
       sample %>%
         str_remove_all("_[u12]+$") %>%
         str_remove_all("^fastp \\| ")
   ) %>%
-  summarise(trimmed_reads = sum(trimmed_reads), .by = sample)
+  mutate(sample_prefix = str_extract(sample, "^[^_]+")) %>%
+  group_by(sample_prefix) %>%
+  summarize(trimmed_reads = sum(trimmed_reads, na.rm = TRUE)) %>%
+  rename(sample = sample_prefix)
 ```
 
 ### Host-mapped reads
@@ -208,11 +200,11 @@ fastp_reads <-
 host_mapped <-
   "data/multiqc_general_stats.txt" %>%
   read_tsv() %>%
-  filter(str_detect(Sample, "fastp")) %>%
+  filter(!str_detect(Sample, "fastp")) %>%
   select(
     sample = Sample,
-    host_mapped = `reads_mapped`,
-    mapping_total = `raw_total_sequences`
+    host_mapped = `Samtools_mqc-generalstats-samtools-reads_mapped`,
+    mapping_total = `Samtools_mqc-generalstats-samtools-raw_total_sequences`
   ) %>%
   mutate(
     host_unmapped = mapping_total - host_mapped
@@ -227,16 +219,19 @@ host_mapped <-
   select(-mapping_total) %>%
   pivot_longer(-host_name:-sample) %>%
   mutate(
-    name = str_glue("{name}_{host_name}")
+    sample =
+      sample %>%
+        str_remove_all("_[u12]+$") %>%
+        str_remove_all("^fastp \\| ")
   ) %>%
   select(-host_name) %>%
-  pivot_wider() %>%
+  pivot_wider()%>%
   mutate(sample = str_extract(sample, "^[^_]+")) %>%
   group_by(sample) %>%
   summarize(
-    mapped_lizard = sum(mapped_lizard),
-    unmapped_lizard = sum(mapped_lizard)
-  ) 
+    mapped = sum(mapped),
+    unmappedd = sum(unmapped)
+  )
 ```
 
 ### Prokaryotic fraction
@@ -288,7 +283,7 @@ mag_mapping <-
 ```{r wrap_statistics, warning=FALSE, comments="", message=FALSE}
 data_stats <- raw_reads %>%
   left_join(fastp_reads) %>%
-  #left_join(host_mapped) %>%
+  left_join(host_mapped) %>%
   left_join(singlem) %>%
   left_join(mag_mapping)
 ```
