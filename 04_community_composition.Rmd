@@ -67,6 +67,66 @@ phylum_summary %>%
         labs(y="Phylum",x="Relative abundance")
 ```
 
+### Phylum relative abundances per time-point
+
+*Pre antibiotic treatment*
+
+```{r taxonomy_phylum_summary_1, warning=FALSE, comments="", message=FALSE}
+phylum_summary_pre <- genome_counts_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>% #apply TSS normalisation
+  pivot_longer(-genome, names_to = "sample", values_to = "count") %>%
+  left_join(sample_metadata, by = join_by(sample == sample)) %>%
+  filter(time_point=="Pre_antibiotics") %>%
+  left_join(genome_metadata, by = join_by(genome == genome)) %>%
+  group_by(sample,phylum) %>%
+  summarise(relabun=sum(count))
+
+phylum_summary_pre %>%
+    group_by(phylum) %>%
+    summarise(mean=mean(relabun, na.rm=T),sd=sd(relabun, na.rm=T)) %>%
+    arrange(-mean) %>%
+    tt()
+```
+
+*Post1 antibiotic treatment*
+
+```{r taxonomy_phylum_summary_2, warning=FALSE, comments="", message=FALSE}
+phylum_summary_post1 <- genome_counts_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>% #apply TSS normalisation
+  pivot_longer(-genome, names_to = "sample", values_to = "count") %>%
+  left_join(sample_metadata, by = join_by(sample == sample)) %>%
+  filter(time_point=="Post_antibiotics_1") %>%
+  left_join(genome_metadata, by = join_by(genome == genome)) %>%
+  group_by(sample,phylum) %>%
+  summarise(relabun=sum(count))
+
+phylum_summary_post1 %>%
+    group_by(phylum) %>%
+    summarise(mean=mean(relabun, na.rm=T),sd=sd(relabun, na.rm=T)) %>%
+    arrange(-mean) %>%
+    tt()
+```
+
+*Post2 antibiotic treatment*
+
+```{r taxonomy_phylum_summary_3, warning=FALSE, comments="", message=FALSE}
+phylum_summary_post2 <- genome_counts_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>% #apply TSS normalisation
+  pivot_longer(-genome, names_to = "sample", values_to = "count") %>%
+  left_join(sample_metadata, by = join_by(sample == sample)) %>%
+  filter(time_point=="Post_antibiotics_2") %>%
+  left_join(genome_metadata, by = join_by(genome == genome)) %>%
+  group_by(sample,phylum) %>%
+  summarise(relabun=sum(count))
+
+phylum_summary_post2 %>%
+    group_by(phylum) %>%
+    summarise(mean=mean(relabun, na.rm=T),sd=sd(relabun, na.rm=T)) %>%
+    arrange(-mean) %>%
+    tt()
+```
+
+
 ## Taxonomy boxplot
 
 ### Family

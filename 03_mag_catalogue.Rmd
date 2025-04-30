@@ -61,6 +61,7 @@ circular_tree <-  circular_tree +
 #Plot circular tree
 circular_tree %>% open_tree(30) %>% rotate_tree(90)
 ```
+
 ## Taxonomy overview
 
 ```{r genome_taxonomy_bacteria}
@@ -148,7 +149,7 @@ grid.arrange(grobs = list(genome_completeness,genome_biplot,genome_contamination
 
 ## Functional overview
 
-```{r function_heatmap, message=FALSE, warning=FALSE, fig.height=10, fig.width=10, fig.fullwidth=TRUE}
+```{r function_heatmap, message=FALSE, warning=FALSE, note=FALSE, fig.height=10, fig.width=10, fig.fullwidth=TRUE}
 
 # Aggregate basal GIFT into elements
 function_table <- genome_gifts %>%
