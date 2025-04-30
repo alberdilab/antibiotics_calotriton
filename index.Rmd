@@ -10,11 +10,11 @@ date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 documentclass: book
 bibliography: [book.bib, packages.bib]
-url: https://alberdilab.github.io/calotriton_metagenomics
+url: https://alberdilab.github.io/antibiotics_calotriton
 description: |
   Data analysis code for the study on the study of gut microbiomes of Pyrenean brook salamanders in high and low altitudes.
 link-citations: yes
-github-repo: alberdilab/calotriton_metagenomics
+github-repo: alberdilab/antibiotics_calotriton
 ---
 
 ```{r knitr_opts, echo=FALSE}
@@ -40,7 +40,7 @@ RStudio > New Project > Version Control > Git
 
 And indicating the following git repository:
 
-> https://github.com/alberdilab/calotriton_metagenomics.git
+> https://github.com/alberdilab/antibiotics_calotriton.git
 
 Once the R project has been created, follow the instructions and code chunks shown in this webbook.
 
